@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Manager - ศูนย์รวมผลงาน</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-light: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1f3a 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1em;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 15px;
+            margin-bottom: 30px;
+            animation: slideUp 0.6s ease-out 0.1s both;
+        }
+
+        .search-box, .sort-select {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 18px;
+            color: var(--text-light);
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus, .sort-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-light);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            border-color: var(--text-light);
+        }
+
+        /* Add Form Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-header {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .close-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-family: inherit;
+            font-size: 1em;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Image Upload */
+        .image-upload {
+            border: 2px dashed var(--primary);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .image-upload:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--secondary);
+        }
+
+        .image-upload.drag-over {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: var(--secondary);
+        }
+
+        .image-preview {
+            margin-top: 15px;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+        }
+
+        /* Portfolio Grid */
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            animation: fadeIn 0.6s ease 0.2s both;
+        }
+
+        .portfolio-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            animation: scaleIn 0.4s ease;
+        }
+
+        .portfolio-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
+        }
+
+        .portfolio-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(236, 72, 153, 0.2));
+            overflow: hidden;
+            position: relative;
+        }
+
+        .portfolio-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .portfolio-card:hover .portfolio-image img {
+            transform: scale(1.05);
+        }
+
+        .portfolio-image.no-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 3em;
+        }
+
+        .portfolio-content {
+            padding: 20px;
+        }
+
+        .portfolio-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-light);
+        }
+
+        .portfolio-category {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .portfolio-description {
+            color: var(--text-muted);
+            font-size: 0.95em;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .portfolio-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            background: rgba(236, 72, 153, 0.2);
+            color: var(--secondary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            background: rgba(236, 72, 153, 0.4);
+        }
+
+        .tag.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .portfolio-date {
+            color: var(--text-muted);
+            font-size: 0.85em;
+            margin-bottom: 15px;
+        }
+
+        .portfolio-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .action-btn.copy {
+            color: var(--secondary);
+        }
+
+        .action-btn.copy:hover {
+            background: var(--secondary);
+        }
+
+        .action-btn.delete {
+            color: var(--danger);
+        }
+
+        .action-btn.delete:hover {
+            background: var(--danger);
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                max-width: 95%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎨 Portfolio Manager</h1>
+            <p>ศูนย์รวมผลงานดิจิทัลของคุณ</p>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <input type="text" id="searchBox" class="search-box" placeholder="🔍 ค้นหาผลงาน...">
+            <select id="sortSelect" class="sort-select">
+                <option value="new">🆕 ใหม่ก่อน</option>
+                <option value="old">🕰️ เก่าก่อน</option>
+                <option value="a-z">🔤 ชื่อ A-Z</option>
+            </select>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="addBtn">➕ เพิ่มผลงาน</button>
+                <button class="btn btn-secondary" id="refreshBtn">🔄 รีเฟรช</button>
+            </div>
+        </div>
+
+        <!-- Portfolio Grid -->
+        <div class="portfolio-grid" id="portfolioGrid">
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>ยังไม่มีผลงาน</h3>
+                <p>คลิก "เพิ่มผลงาน" เพื่อเริ่มต้น</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="modalTitle">➕ เพิ่มผลงานใหม่</span>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+
+            <form id="portfolioForm">
+                <div class="form-group">
+                    <label>ชื่อผลงาน *</label>
+                    <input type="text" id="title" required placeholder="เช่น Todo App">
+                </div>
+
+                <div class="form-group">
+                    <label>คำอธิบาย *</label>
+                    <textarea id="description" required placeholder="อธิบายผลงานของคุณ..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>URL ผลงาน *</label>
+                    <input type="url" id="url" required placeholder="https://example.com">
+                </div>
+
+                <div class="form-group">
+                    <label>หมวดหมู่ *</label>
+                    <input type="text" id="category" required placeholder="เช่น Web App, AI Tool, Game">
+                </div>
+
+                <div class="form-group">
+                    <label>Tags (คั่นด้วยจุลภาค)</label>
+                    <input type="text" id="tags" placeholder="react, javascript, portfolio">
+                </div>
+
+                <div class="form-group">
+                    <label>รูปภาพ</label>
+                    <div class="image-upload" id="imageUpload" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                        <div>📸 ลากรูปมาวางที่นี่ หรือ คลิกเพื่อเลือก</div>
+                        <input type="file" id="imageFile" style="display: none;" accept="image/*">
+                    </div>
+                    <div class="image-preview" id="imagePreview"></div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">💾 บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ===== ตั้งค่า =====
+        const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL'; // ← แทนที่ด้วย URL ของคุณ
+        let portfolioData = [];
+        let currentEditId = null;
+        let imageBase64 = null;
+
+        // ===== โหลดข้อมูล =====
+        async function loadPortfolio() {
+            try {
+                const response = await fetch(APPS_SCRIPT_URL);
+                const result = await response.json();
+                
+                if (result.success) {
+                    portfolioData = result.data;
+                    renderPortfolio(portfolioData);
+                } else {
+                    showToast('ไม่สามารถโหลดข้อมูล: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('⚠️ โปรดใส่ Apps Script URL ที่ถูกต้อง', 'error');
+            }
+        }
+
+        // ===== แสดงผลงาน =====
+        function renderPortfolio(data) {
+            const grid = document.getElementById('portfolioGrid');
+            
+            if (data.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>ยังไม่มีผลงาน</h3>
+                        <p>คลิก "เพิ่มผลงาน" เพื่อเริ่มต้น</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = data.map(item => `
+                <div class="portfolio-card">
+                    <div class="portfolio-image ${!item.E ? 'no-image' : ''}">
+                        ${item.E ? `<img src="${item.E}" alt="${item.B}">` : '🖼️'}
+                    </div>
+                    <div class="portfolio-content">
+                        <div class="portfolio-title">${item.B}</div>
+                        <div class="portfolio-category">${item.F}</div>
+                        <div class="portfolio-description">${item.C}</div>
+                        ${item.G ? `
+                            <div class="portfolio-tags">
+                                ${item.G.split(',').map(tag => `<span class="tag">${tag.trim()}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="portfolio-date">📅 ${item.H}</div>
+                        <div class="portfolio-actions">
+                            <a href="${item.D}" target="_blank" class="action-btn">
+                                🔗 เปิด
+                            </a>
+                            <button class="action-btn copy" onclick="copyToClipboard('${item.D}')">
+                                📋 คัดลอก
+                            </button>
+                            <button class="action-btn delete" onclick="deletePortfolio('${item.A}')">
+                                🗑️ ลบ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ===== ค้นหา =====
+        document.getElementById('searchBox').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = portfolioData.filter(item => 
+                item.B.toLowerCase().includes(query) || 
+                item.C.toLowerCase().includes(query) ||
+                (item.G && item.G.toLowerCase().includes(query))
+            );
+            renderPortfolio(filtered);
+        });
+
+        // ===== จัดเรียง =====
+        document.getElementById('sortSelect').addEventListener('change', (e) => {
+            const sorted = [...portfolioData];
+            switch(e.target.value) {
+                case 'new':
+                    sorted.sort((a, b) => new Date(b.H) - new Date(a.H));
+                    break;
+                case 'old':
+                    sorted.sort((a, b) => new Date(a.H) - new Date(b.H));
+                    break;
+                case 'a-z':
+                    sorted.sort((a, b) => a.B.localeCompare(b.B));
+                    break;
+            }
+            renderPortfolio(sorted);
+        });
+
+        // ===== เพิ่มผลงาน =====
+        document.getElementById('addBtn').addEventListener('click', () => {
+            currentEditId = null;
+            document.getElementById('modalTitle').textContent = '➕ เพิ่มผลงานใหม่';
+            document.getElementById('portfolioForm').reset();
+            imageBase64 = null;
+            document.getElementById('imagePreview').innerHTML = '';
+            document.getElementById('addModal').classList.add('active');
+        });
+
+        document.getElementById('portfolioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                action: currentEditId ? 'update' : 'add',
+                id: currentEditId,
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                url: document.getElementById('url').value,
+                image_url: imageBase64 || '',
+                category: document.getElementById('category').value,
+                tags: document.getElementById('tags').value,
+                status: 'active'
+            };
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: new URLSearchParams(formData)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showToast('✅ ' + result.message);
+                    closeModal();
+                    loadPortfolio();
+                } else {
+                    showToast('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+            }
+        });
+
+        // ===== ลาก-วางรูป =====
+        document.getElementById('imageUpload').addEventListener('click', () => {
+            document.getElementById('imageFile').click();
+        });
+
+        document.getElementById('imageFile').addEventListener('change', (e) => {
+            handleImageFile(e.target.files[0]);
+        });
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('imageUpload').classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            document.getElementById('imageUpload').classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('imageUpload').classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length) handleImageFile(files[0]);
+        }
+
+        function handleImageFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showToast('⚠️ โปรดเลือกไฟล์รูปภาพ', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imageBase64 = e.target.result;
+                document.getElementById('imagePreview').innerHTML = 
+                    `<img src="${imageBase64}" alt="preview">`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ===== ลบผลงาน =====
+        async function deletePortfolio(id) {
+            if (!confirm('⚠️ ยืนยันการลบผลงานนี้?')) return;
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        action: 'delete',
+                        id: id
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showToast('✅ ' + result.message);
+                    loadPortfolio();
+                } else {
+                    showToast('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                showToast('❌ ' + error.message, 'error');
+            }
+        }
+
+        // ===== คัดลอก URL =====
+        function copyToClipboard(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('✅ คัดลอก URL สำเร็จ!');
+            });
+        }
+
+        // ===== ปิด Modal =====
+        function closeModal() {
+            document.getElementById('addModal').classList.remove('active');
+        }
+
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('addModal');
+            if (e.target === modal) closeModal();
+        });
+
+        // ===== Toast Notification =====
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // ===== รีเฟรช =====
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            loadPortfolio();
+            showToast('🔄 รีเฟรชสำเร็จ');
+        });
+
+        // ===== เริ่มต้นแอป =====
+        loadPortfolio();
+    </script>
+</body>
+</html>
