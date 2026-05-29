@@ -1,4 +1,4 @@
-portfolio-pwa/
+//portfolio-pwa/
 ├── index.html        ← ไฟล์เดิม + PWA integration
 ├── manifest.json     ← ใหม่
 ├── sw.js             ← ใหม่ (Service Worker)
